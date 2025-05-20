@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { FilePdf, FileSpreadsheet, FileText, Download, Search, Filter } from "lucide-react";
+import { FileText, FileSpreadsheet, Download, Search, Filter } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -160,7 +160,7 @@ const RegisterClient = () => {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem onClick={() => handleExport("pdf")}>
-                          <FilePdf className="h-4 w-4 mr-2" />
+                          <FileText className="h-4 w-4 mr-2" />
                           Export as PDF
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => handleExport("excel")}>

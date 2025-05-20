@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,7 +12,7 @@ import {
 } from "@/components/ui/select";
 import { toast } from "@/components/ui/sonner";
 import { Client, mockClients } from "@/utils/types";
-import { FileText, FileSpreadsheet, FilePdf, Download } from "lucide-react";
+import { FileText, FileSpreadsheet, Download } from "lucide-react";
 import { 
   DropdownMenu,
   DropdownMenuContent,
@@ -149,7 +148,7 @@ const ClientForm = ({ onClientAdded, standalone = false }: ClientFormProps) => {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem>
-                <FilePdf className="h-4 w-4 mr-2" />
+                <FileText className="h-4 w-4 mr-2" />
                 Export as PDF
               </DropdownMenuItem>
               <DropdownMenuItem>
@@ -164,6 +163,7 @@ const ClientForm = ({ onClientAdded, standalone = false }: ClientFormProps) => {
           </DropdownMenu>
         )}
       </CardHeader>
+      
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

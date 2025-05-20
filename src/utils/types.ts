@@ -52,6 +52,7 @@ export interface Client {
   originalHome: string;
   street: string;
   admissionDate: string;
+  intake?: string;  // Added intake field
   parents: Parent[];
   academicRecords?: AcademicRecord[];
   homeVisits?: HomeVisit[];
