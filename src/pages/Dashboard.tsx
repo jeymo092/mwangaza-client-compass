@@ -1,11 +1,11 @@
 
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SidebarProvider } from "@/components/ui/sidebar";
-import { Users, FileText, Calendar, BarChart3, BookOpen } from "lucide-react";
+import { Users, FileText, Calendar, BarChart3, BookOpen, UserPlus } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import MainSidebar from "@/components/Sidebar";
 import ClientForm from "@/components/ClientForm";
@@ -13,12 +13,17 @@ import { mockClients, mockHomeVisits, mockAcademicRecords, Client, departments }
 import DepartmentAccess from "@/components/DepartmentAccess";
 
 const Dashboard = () => {
+  const navigate = useNavigate();
   const [clients, setClients] = useState(mockClients);
   const recentHomeVisits = mockHomeVisits.slice(0, 3);
   const totalAcademicRecords = mockAcademicRecords.length;
 
   const handleClientAdded = (client: Client) => {
     setClients((prev) => [client, ...prev]);
+  };
+
+  const handleRegisterClientClick = () => {
+    navigate('/clients/register');
   };
 
   const StatCard = ({ title, value, description, icon, className }: { title: string, value: string | number, description: string, icon: React.ReactNode, className?: string }) => (
@@ -41,7 +46,13 @@ const Dashboard = () => {
         <div className="flex-1">
           <Navbar />
           <main className="container-custom py-6">
-            <h1 className="text-3xl font-bold mb-6">Dashboard</h1>
+            <div className="flex justify-between items-center mb-6">
+              <h1 className="text-3xl font-bold">Dashboard</h1>
+              <Button onClick={handleRegisterClientClick}>
+                <UserPlus className="h-4 w-4 mr-2" />
+                Register New Client
+              </Button>
+            </div>
 
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
               <StatCard
@@ -78,7 +89,6 @@ const Dashboard = () => {
               <Tabs defaultValue="overview" className="w-full">
                 <TabsList>
                   <TabsTrigger value="overview">Overview</TabsTrigger>
-                  <TabsTrigger value="register-client">Register Client</TabsTrigger>
                   <TabsTrigger value="reports">Recent Reports</TabsTrigger>
                 </TabsList>
                 <TabsContent value="overview" className="mt-4">
@@ -166,22 +176,6 @@ const Dashboard = () => {
                         </CardContent>
                       </Card>
                     </div>
-                  </DepartmentAccess>
-                </TabsContent>
-
-                <TabsContent value="register-client" className="mt-4">
-                  <DepartmentAccess 
-                    allowedRoles={["admin", "social_worker"]}
-                    fallback={
-                      <Card className="p-6">
-                        <CardTitle className="text-lg mb-2">Restricted Access</CardTitle>
-                        <CardDescription>
-                          Only administrators and social workers can register new clients.
-                        </CardDescription>
-                      </Card>
-                    }
-                  >
-                    <ClientForm onClientAdded={handleClientAdded} />
                   </DepartmentAccess>
                 </TabsContent>
 

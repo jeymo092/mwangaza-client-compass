@@ -13,23 +13,57 @@ import {
 } from "@/components/ui/select";
 import { toast } from "@/components/ui/sonner";
 import { Client, mockClients } from "@/utils/types";
+import { FileText, FileSpreadsheet, FilePdf, Download } from "lucide-react";
+import { 
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface ClientFormProps {
   onClientAdded: (client: Client) => void;
+  standalone?: boolean;
 }
 
-const ClientForm = ({ onClientAdded }: ClientFormProps) => {
+const ClientForm = ({ onClientAdded, standalone = false }: ClientFormProps) => {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [dateOfBirth, setDateOfBirth] = useState("");
   const [gender, setGender] = useState<"male" | "female" | "other">("male");
   const [originalHome, setOriginalHome] = useState("");
   const [street, setStreet] = useState("");
+  const [intake, setIntake] = useState(getCurrentIntake());
   
   const [parentName, setParentName] = useState("");
   const [parentContact, setParentContact] = useState("");
   const [parentLocation, setParentLocation] = useState("");
   const [parentRelationship, setParentRelationship] = useState("Mother");
+
+  function getCurrentIntake() {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  }
+
+  // Generate available intakes (current month and past 11 months)
+  const generateIntakeOptions = () => {
+    const options = [];
+    const today = new Date();
+    
+    for (let i = 0; i < 12; i++) {
+      const date = new Date(today);
+      date.setMonth(today.getMonth() - i);
+      const intakeValue = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      const intakeLabel = new Date(date.getFullYear(), date.getMonth(), 1)
+        .toLocaleDateString('en-US', { year: 'numeric', month: 'long' });
+      
+      options.push({ value: intakeValue, label: intakeLabel });
+    }
+    
+    return options;
+  };
+
+  const intakeOptions = generateIntakeOptions();
 
   // Generate the next admission number
   const generateAdmissionNumber = () => {
@@ -66,6 +100,7 @@ const ClientForm = ({ onClientAdded }: ClientFormProps) => {
       gender,
       originalHome,
       street,
+      intake: intake,
       admissionDate: new Date().toISOString().split('T')[0],
       parents: [
         {
@@ -88,6 +123,7 @@ const ClientForm = ({ onClientAdded }: ClientFormProps) => {
     setGender("male");
     setOriginalHome("");
     setStreet("");
+    setIntake(getCurrentIntake());
     setParentName("");
     setParentContact("");
     setParentLocation("");
@@ -95,12 +131,38 @@ const ClientForm = ({ onClientAdded }: ClientFormProps) => {
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Register New Client</CardTitle>
-        <CardDescription>
-          Enter client details. An admission number will be automatically assigned.
-        </CardDescription>
+    <Card className={standalone ? "max-w-4xl mx-auto" : ""}>
+      <CardHeader className="flex flex-row items-center justify-between">
+        <div>
+          <CardTitle>Register New Client</CardTitle>
+          <CardDescription>
+            Enter client details. An admission number will be automatically assigned.
+          </CardDescription>
+        </div>
+        {standalone && (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm">
+                <Download className="h-4 w-4 mr-2" />
+                Export
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem>
+                <FilePdf className="h-4 w-4 mr-2" />
+                Export as PDF
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                <FileSpreadsheet className="h-4 w-4 mr-2" />
+                Export as Excel
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                <FileText className="h-4 w-4 mr-2" />
+                Export as CSV
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -127,7 +189,7 @@ const ClientForm = ({ onClientAdded }: ClientFormProps) => {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-2">
               <Label htmlFor="dateOfBirth">Date of Birth</Label>
               <Input
@@ -148,6 +210,21 @@ const ClientForm = ({ onClientAdded }: ClientFormProps) => {
                   <SelectItem value="male">Male</SelectItem>
                   <SelectItem value="female">Female</SelectItem>
                   <SelectItem value="other">Other</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="intake">Intake</Label>
+              <Select value={intake} onValueChange={setIntake}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select intake" />
+                </SelectTrigger>
+                <SelectContent>
+                  {intakeOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
