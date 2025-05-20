@@ -1,3 +1,4 @@
+
 # Welcome to your Lovable project
 
 ## Project info
@@ -59,6 +60,37 @@ This project is built with:
 - React
 - shadcn-ui
 - Tailwind CSS
+
+## Docker MySQL Setup
+
+To run the MySQL database using Docker:
+
+1. Make sure Docker is installed on your system.
+2. Run the following command in the project root directory:
+
+```sh
+docker-compose up -d
+```
+
+This will start a MySQL container with the following credentials:
+- Database name: mwangaza_db
+- Username: mwangaza_user
+- Password: mwangaza_password
+- Port: 3306
+
+The database schema will be automatically created using the initialization script in `mysql/init/01-schema.sql`.
+
+To stop the container:
+
+```sh
+docker-compose down
+```
+
+To stop the container and remove the volume:
+
+```sh
+docker-compose down -v
+```
 
 ## How can I deploy this project?
 
