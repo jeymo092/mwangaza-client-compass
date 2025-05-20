@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -34,6 +33,7 @@ const ClientForm = ({ onClientAdded, standalone = false }: ClientFormProps) => {
   const [originalHome, setOriginalHome] = useState("");
   const [street, setStreet] = useState("");
   const [intake, setIntake] = useState(getCurrentIntake());
+  const [isCustomIntake, setIsCustomIntake] = useState(false);
   
   const [parentName, setParentName] = useState("");
   const [parentContact, setParentContact] = useState("");
@@ -60,10 +60,24 @@ const ClientForm = ({ onClientAdded, standalone = false }: ClientFormProps) => {
       options.push({ value: intakeValue, label: intakeLabel });
     }
     
+    // Add a custom option
+    options.push({ value: "custom", label: "Enter Custom Intake" });
+    
     return options;
   };
 
   const intakeOptions = generateIntakeOptions();
+
+  // Handle intake change
+  const handleIntakeChange = (value: string) => {
+    if (value === "custom") {
+      setIsCustomIntake(true);
+      setIntake("");
+    } else {
+      setIsCustomIntake(false);
+      setIntake(value);
+    }
+  };
 
   // Generate the next admission number
   const generateAdmissionNumber = () => {
@@ -88,6 +102,11 @@ const ClientForm = ({ onClientAdded, standalone = false }: ClientFormProps) => {
     
     if (!firstName || !lastName || !dateOfBirth || !originalHome || !parentName || !parentContact) {
       toast.error("Please fill in all required fields");
+      return;
+    }
+
+    if (!intake) {
+      toast.error("Please provide an intake value");
       return;
     }
 
@@ -124,6 +143,7 @@ const ClientForm = ({ onClientAdded, standalone = false }: ClientFormProps) => {
     setOriginalHome("");
     setStreet("");
     setIntake(getCurrentIntake());
+    setIsCustomIntake(false);
     setParentName("");
     setParentContact("");
     setParentLocation("");
@@ -216,18 +236,41 @@ const ClientForm = ({ onClientAdded, standalone = false }: ClientFormProps) => {
             </div>
             <div className="space-y-2">
               <Label htmlFor="intake">Intake</Label>
-              <Select value={intake} onValueChange={setIntake}>
-                <SelectTrigger id="intake">
-                  <SelectValue placeholder="Select intake" />
-                </SelectTrigger>
-                <SelectContent>
-                  {intakeOptions.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              {isCustomIntake ? (
+                <Input
+                  id="customIntake"
+                  value={intake}
+                  onChange={(e) => setIntake(e.target.value)}
+                  placeholder="e.g., 33,30"
+                  required
+                />
+              ) : (
+                <Select value={intake} onValueChange={handleIntakeChange}>
+                  <SelectTrigger id="intake">
+                    <SelectValue placeholder="Select intake" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {intakeOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+              {isCustomIntake && (
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  className="mt-2 text-xs w-full"
+                  onClick={() => {
+                    setIsCustomIntake(false);
+                    setIntake(getCurrentIntake());
+                  }}
+                >
+                  Return to standard intake options
+                </Button>
+              )}
             </div>
           </div>
 
