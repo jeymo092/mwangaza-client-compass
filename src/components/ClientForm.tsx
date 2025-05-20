@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -216,7 +217,7 @@ const ClientForm = ({ onClientAdded, standalone = false }: ClientFormProps) => {
             <div className="space-y-2">
               <Label htmlFor="intake">Intake</Label>
               <Select value={intake} onValueChange={setIntake}>
-                <SelectTrigger>
+                <SelectTrigger id="intake">
                   <SelectValue placeholder="Select intake" />
                 </SelectTrigger>
                 <SelectContent>
