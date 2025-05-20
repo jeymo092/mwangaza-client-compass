@@ -122,15 +122,15 @@ const RegisterClient = () => {
                         <div className="p-2">
                           <Label htmlFor="filter-intake" className="text-xs">Filter by Intake</Label>
                           <Select 
-                            value={selectedIntake || ""} 
-                            onValueChange={(value) => setSelectedIntake(value || null)}
+                            value={selectedIntake || "all"} 
+                            onValueChange={(value) => setSelectedIntake(value === "all" ? null : value)}
                           >
                             <SelectTrigger id="filter-intake">
                               <SelectValue placeholder="Select intake" />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="">All Intakes</SelectItem>
-                              {intakeOptions.map((option) => (
+                              <SelectItem value="all">All Intakes</SelectItem>
+                              {generateIntakeOptions().map((option) => (
                                 <SelectItem key={option.value} value={option.value}>
                                   {option.label}
                                 </SelectItem>
