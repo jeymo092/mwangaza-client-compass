@@ -32,8 +32,7 @@ const ClientForm = ({ onClientAdded, standalone = false }: ClientFormProps) => {
   const [gender, setGender] = useState<"male" | "female" | "other">("male");
   const [originalHome, setOriginalHome] = useState("");
   const [street, setStreet] = useState("");
-  const [intake, setIntake] = useState(getCurrentIntake());
-  const [isCustomIntake, setIsCustomIntake] = useState(false);
+  const [intake, setIntake] = useState("");
   
   const [parentName, setParentName] = useState("");
   const [parentContact, setParentContact] = useState("");
@@ -44,40 +43,6 @@ const ClientForm = ({ onClientAdded, standalone = false }: ClientFormProps) => {
     const now = new Date();
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
   }
-
-  // Generate available intakes (current month and past 11 months)
-  const generateIntakeOptions = () => {
-    const options = [];
-    const today = new Date();
-    
-    for (let i = 0; i < 12; i++) {
-      const date = new Date(today);
-      date.setMonth(today.getMonth() - i);
-      const intakeValue = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-      const intakeLabel = new Date(date.getFullYear(), date.getMonth(), 1)
-        .toLocaleDateString('en-US', { year: 'numeric', month: 'long' });
-      
-      options.push({ value: intakeValue, label: intakeLabel });
-    }
-    
-    // Add a custom option
-    options.push({ value: "custom", label: "Enter Custom Intake" });
-    
-    return options;
-  };
-
-  const intakeOptions = generateIntakeOptions();
-
-  // Handle intake change
-  const handleIntakeChange = (value: string) => {
-    if (value === "custom") {
-      setIsCustomIntake(true);
-      setIntake("");
-    } else {
-      setIsCustomIntake(false);
-      setIntake(value);
-    }
-  };
 
   // Generate the next admission number
   const generateAdmissionNumber = () => {
@@ -142,8 +107,7 @@ const ClientForm = ({ onClientAdded, standalone = false }: ClientFormProps) => {
     setGender("male");
     setOriginalHome("");
     setStreet("");
-    setIntake(getCurrentIntake());
-    setIsCustomIntake(false);
+    setIntake("");
     setParentName("");
     setParentContact("");
     setParentLocation("");
@@ -236,41 +200,13 @@ const ClientForm = ({ onClientAdded, standalone = false }: ClientFormProps) => {
             </div>
             <div className="space-y-2">
               <Label htmlFor="intake">Intake</Label>
-              {isCustomIntake ? (
-                <Input
-                  id="customIntake"
-                  value={intake}
-                  onChange={(e) => setIntake(e.target.value)}
-                  placeholder="e.g., 33,30"
-                  required
-                />
-              ) : (
-                <Select value={intake} onValueChange={handleIntakeChange}>
-                  <SelectTrigger id="intake">
-                    <SelectValue placeholder="Select intake" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {intakeOptions.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              )}
-              {isCustomIntake && (
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  className="mt-2 text-xs w-full"
-                  onClick={() => {
-                    setIsCustomIntake(false);
-                    setIntake(getCurrentIntake());
-                  }}
-                >
-                  Return to standard intake options
-                </Button>
-              )}
+              <Input
+                id="intake"
+                value={intake}
+                onChange={(e) => setIntake(e.target.value)}
+                placeholder="e.g., 33,30"
+                required
+              />
             </div>
           </div>
 
