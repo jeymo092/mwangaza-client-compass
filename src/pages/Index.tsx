@@ -6,12 +6,45 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "@/components/ui/sonner";
+import { User, roleToDepartmentMap, departments } from "@/utils/types";
 
 const Index = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+
+  // Department user accounts
+  const departmentUsers: User[] = [
+    {
+      id: "1",
+      name: "Admin User",
+      email: "admin@mwangaza.org",
+      role: "admin",
+      departmentId: "admin"
+    },
+    {
+      id: "2",
+      name: "Social Worker",
+      email: "social@mwangaza.org",
+      role: "social_worker",
+      departmentId: "social_work"
+    },
+    {
+      id: "3",
+      name: "Psychologist",
+      email: "psycho@mwangaza.org",
+      role: "psychologist",
+      departmentId: "psychology"
+    },
+    {
+      id: "4",
+      name: "Educator",
+      email: "teacher@mwangaza.org",
+      role: "educator",
+      departmentId: "education"
+    },
+  ];
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,13 +56,17 @@ const Index = () => {
 
     setIsLoading(true);
 
-    // Simulate authentication (in a real app, this would be an API call)
+    // Find user with matching email
+    const user = departmentUsers.find(user => user.email.toLowerCase() === email.toLowerCase());
+    
+    // Simple authentication (in a real app, this would check password hash)
     setTimeout(() => {
       setIsLoading(false);
       
-      // Simple validation - in production this would be authenticated properly
-      if (email.includes("@mwangaza") && password.length > 4) {
-        toast.success("Login successful!");
+      if (user && password === "password123") {
+        // Store user info in session storage
+        sessionStorage.setItem("currentUser", JSON.stringify(user));
+        toast.success(`Welcome ${user.name}! Logged in as ${user.role.replace('_', ' ')}`);
         navigate("/dashboard");
       } else {
         toast.error("Invalid email or password");
@@ -88,8 +125,17 @@ const Index = () => {
           </CardContent>
         </Card>
         
-        <div className="mt-6 text-center text-sm text-muted-foreground">
-          <p>For demonstration purposes, use any email ending with @mwangaza.org and a password with more than 4 characters</p>
+        <div className="mt-6 text-center text-sm space-y-2">
+          <p className="text-muted-foreground font-semibold">Department Logins</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-w-md mx-auto">
+            {departmentUsers.map(user => (
+              <div key={user.id} className="text-xs bg-background/80 p-2 rounded-md shadow-sm">
+                <p className="font-bold">{user.name}</p>
+                <p>Email: {user.email}</p>
+                <p>Password: password123</p>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>

@@ -13,13 +13,16 @@ import {
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { currentUser } from "@/utils/types";
+import { getCurrentUser } from "@/utils/types";
+import LogoutButton from "@/components/LogoutButton";
 
 interface NavbarProps {
   title?: string;
 }
 
 const Navbar = ({ title = "Mwangaza Rehabilitation Center" }: NavbarProps) => {
+  const currentUser = getCurrentUser();
+  
   return (
     <div className="sticky top-0 z-30 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container-custom flex h-14 items-center justify-between">
@@ -34,6 +37,9 @@ const Navbar = ({ title = "Mwangaza Rehabilitation Center" }: NavbarProps) => {
             <span className="text-xl font-semibold hidden md:block">{title}</span>
             <span className="text-xl font-semibold md:hidden">MRC</span>
           </Link>
+          <span className="hidden md:inline-flex bg-primary/10 text-primary px-2 py-1 rounded-md text-xs font-medium">
+            {currentUser.role.replace('_', ' ')}
+          </span>
         </div>
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="icon" className="relative">
@@ -53,7 +59,12 @@ const Navbar = ({ title = "Mwangaza Rehabilitation Center" }: NavbarProps) => {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuLabel>My Account</DropdownMenuLabel>
+              <DropdownMenuLabel>
+                <div>
+                  <p>{currentUser.name}</p>
+                  <p className="text-xs text-muted-foreground">{currentUser.email}</p>
+                </div>
+              </DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem>
                 <User className="mr-2 h-4 w-4" />
@@ -61,8 +72,8 @@ const Navbar = ({ title = "Mwangaza Rehabilitation Center" }: NavbarProps) => {
               </DropdownMenuItem>
               <DropdownMenuItem>Settings</DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>
-                <Link to="/" className="w-full">Log out</Link>
+              <DropdownMenuItem asChild>
+                <Link to="/" onClick={() => sessionStorage.removeItem("currentUser")} className="w-full">Log out</Link>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

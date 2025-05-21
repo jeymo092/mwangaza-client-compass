@@ -82,14 +82,24 @@ export const roleToDepartmentMap: Record<UserRole, string> = {
   "educator": "education"
 };
 
-// Mock user data for demonstration
-export const currentUser: User = {
-  id: "1",
-  name: "John Doe",
-  email: "john.doe@mwangaza.org",
-  role: "admin",
-  departmentId: "admin"
+// Get current user from session storage or return default admin user
+export const getCurrentUser = (): User => {
+  const storedUser = sessionStorage.getItem("currentUser");
+  if (storedUser) {
+    return JSON.parse(storedUser);
+  }
+  // Default fallback user
+  return {
+    id: "1",
+    name: "Admin User",
+    email: "admin@mwangaza.org",
+    role: "admin",
+    departmentId: "admin"
+  };
 };
+
+// Use the function to get current user
+export const currentUser = getCurrentUser();
 
 // Mock client data
 export const mockClients: Client[] = [

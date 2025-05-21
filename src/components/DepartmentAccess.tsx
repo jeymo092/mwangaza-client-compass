@@ -1,5 +1,5 @@
 
-import { currentUser, UserRole, Department } from "@/utils/types";
+import { getCurrentUser, UserRole } from "@/utils/types";
 import { ReactNode } from "react";
 
 interface DepartmentAccessProps {
@@ -15,6 +15,9 @@ const DepartmentAccess = ({
   children, 
   fallback = <div className="p-4 bg-muted rounded-md">You don't have access to this content.</div> 
 }: DepartmentAccessProps) => {
+  // Get current user from session storage
+  const currentUser = getCurrentUser();
+  
   // Check if current user role is in the allowed roles
   const hasRoleAccess = allowedRoles.includes(currentUser.role);
   
