@@ -12,10 +12,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { SidebarProvider } from "@/components/ui/sidebar";
-import { FileText, Search, Calendar } from "lucide-react";
+import { FileText, Search, Calendar, Download, Save } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import MainSidebar from "@/components/Sidebar";
-import { HomeVisit, mockHomeVisits, mockClients } from "@/utils/types";
+import { HomeVisit, mockHomeVisits, mockClients, currentUser } from "@/utils/types";
+import { toast } from "@/components/ui/sonner";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
+import { stringify } from "csv-stringify";
+import DepartmentAccess from "@/components/DepartmentAccess";
 
 const Reports = () => {
   const [reports, setReports] = useState<HomeVisit[]>(mockHomeVisits);
@@ -55,6 +60,82 @@ const Reports = () => {
     })
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
+  // Export to PDF function
+  const exportToPDF = () => {
+    try {
+      const doc = new jsPDF();
+      
+      // Add title
+      doc.setFontSize(16);
+      doc.text("Mwangaza Rehabilitation Center - Home Visit Reports", 14, 15);
+      doc.setFontSize(12);
+      doc.text(`Generated on ${new Date().toLocaleDateString()} by ${currentUser.name}`, 14, 23);
+      
+      // Prepare data for table
+      const tableData = filteredReports.map(report => {
+        const client = mockClients.find(c => c.id === report.clientId);
+        return [
+          client ? `${client.firstName} ${client.lastName}` : "Unknown Client",
+          report.date,
+          report.conductedBy,
+          report.summary.substring(0, 60) + (report.summary.length > 60 ? "..." : ""),
+        ];
+      });
+      
+      // Generate table
+      autoTable(doc, {
+        head: [["Client Name", "Visit Date", "Conducted By", "Summary"]],
+        body: tableData,
+        startY: 30,
+        headStyles: { fillColor: [41, 128, 185] },
+      });
+      
+      // Save the PDF
+      doc.save("mwangaza-home-visit-reports.pdf");
+      toast.success("PDF exported successfully");
+    } catch (error) {
+      console.error("Failed to export PDF:", error);
+      toast.error("Failed to export PDF");
+    }
+  };
+  
+  // Export to CSV function
+  const exportToCSV = () => {
+    try {
+      // Prepare data
+      const csvData = filteredReports.map(report => {
+        const client = mockClients.find(c => c.id === report.clientId);
+        return {
+          "Client Name": client ? `${client.firstName} ${client.lastName}` : "Unknown Client",
+          "Visit Date": report.date,
+          "Conducted By": report.conductedBy,
+          "Summary": report.summary,
+          "Recommendations": report.recommendations || "",
+        };
+      });
+      
+      // Convert to CSV
+      stringify(csvData, { header: true }, (err, output) => {
+        if (err) throw err;
+        
+        // Create download link
+        const blob = new Blob([output], { type: "text/csv;charset=utf-8;" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.setAttribute("href", url);
+        link.setAttribute("download", "mwangaza-home-visit-reports.csv");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        toast.success("CSV exported successfully");
+      });
+    } catch (error) {
+      console.error("Failed to export CSV:", error);
+      toast.error("Failed to export CSV");
+    }
+  };
+
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full">
@@ -67,11 +148,25 @@ const Reports = () => {
                 <FileText className="h-6 w-6 mr-2" />
                 <h1 className="text-3xl font-bold">Reports</h1>
               </div>
-              <Button asChild>
-                <Link to="/reports/new">
-                  New Home Visit Report
-                </Link>
-              </Button>
+              <div className="flex items-center gap-2">
+                <DepartmentAccess allowedRoles={["admin", "social_worker"]}>
+                  <Button variant="outline" onClick={exportToPDF} className="flex items-center gap-1">
+                    <Save className="h-4 w-4" />
+                    Export PDF
+                  </Button>
+                  <Button variant="outline" onClick={exportToCSV} className="flex items-center gap-1">
+                    <Download className="h-4 w-4" />
+                    Export CSV
+                  </Button>
+                </DepartmentAccess>
+                <DepartmentAccess allowedRoles={["admin", "social_worker"]}>
+                  <Button asChild>
+                    <Link to="/reports/new">
+                      New Home Visit Report
+                    </Link>
+                  </Button>
+                </DepartmentAccess>
+              </div>
             </div>
 
             <div className="flex flex-col md:flex-row gap-4 mb-6">
