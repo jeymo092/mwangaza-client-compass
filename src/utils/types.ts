@@ -6,6 +6,7 @@ export interface User {
   name: string;
   email: string;
   role: UserRole;
+  departmentId?: string;
 }
 
 export interface Subject {
@@ -73,12 +74,21 @@ export const departments = [
   { id: "education", name: "Education", description: "Academic progress and teaching", staffCount: 6 },
 ];
 
+// Role to department mapping
+export const roleToDepartmentMap: Record<UserRole, string> = {
+  "admin": "admin",
+  "social_worker": "social_work",
+  "psychologist": "psychology",
+  "educator": "education"
+};
+
 // Mock user data for demonstration
 export const currentUser: User = {
   id: "1",
   name: "John Doe",
   email: "john.doe@mwangaza.org",
-  role: "admin"
+  role: "admin",
+  departmentId: "admin"
 };
 
 // Mock client data
