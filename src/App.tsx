@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -41,21 +40,9 @@ const App = () => {
   // Test database connection on app load
   useEffect(() => {
     const initDB = async () => {
-      // Check if we have database settings in localStorage
-      const hasDBConfig = localStorage.getItem('DB_HOST') && 
-                         localStorage.getItem('DB_USER') && 
-                         localStorage.getItem('DB_NAME');
-      
-      if (hasDBConfig) {
-        // Set environment variables from localStorage
-        process.env.DB_HOST = localStorage.getItem('DB_HOST') || undefined;
-        process.env.DB_USER = localStorage.getItem('DB_USER') || undefined;
-        process.env.DB_PASSWORD = localStorage.getItem('DB_PASSWORD') || undefined;
-        process.env.DB_NAME = localStorage.getItem('DB_NAME') || undefined;
-        
-        // Test connection
-        await testConnection();
-      }
+      // Test connection to mock database
+      const isConnected = await testConnection();
+      console.log("Database connection test:", isConnected ? "Success" : "Failed");
     };
     
     initDB();

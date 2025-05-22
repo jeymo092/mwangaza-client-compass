@@ -5,126 +5,150 @@ import { v4 as uuidv4 } from 'uuid';
 
 // Get all clients
 export const getClients = async (): Promise<Client[]> => {
-  const clients = await query<any[]>('SELECT * FROM clients');
-  
-  // For each client, get their parents
-  const clientsWithParents = await Promise.all(
-    clients.map(async (client) => {
-      const parents = await query<Parent[]>(
-        'SELECT * FROM parents WHERE client_id = ?',
-        [client.id]
-      );
-      
-      return {
-        id: client.id,
-        admissionNumber: client.admission_number,
-        firstName: client.first_name,
-        lastName: client.last_name,
-        dateOfBirth: client.date_of_birth,
-        gender: client.gender,
-        originalHome: client.original_home,
-        street: client.street,
-        admissionDate: client.admission_date,
-        intake: client.intake,
-        notes: client.notes,
-        parents: parents.map(p => ({
-          id: p.id,
-          name: p.name,
-          contact: p.contact,
-          location: p.location,
-          relationship: p.relationship
-        }))
-      };
-    })
-  );
-  
-  return clientsWithParents;
+  try {
+    const clients = await query<any[]>('SELECT * FROM clients');
+    
+    // For each client, get their parents
+    const clientsWithParents = await Promise.all(
+      clients.map(async (client) => {
+        const parents = await query<Parent[]>(
+          'SELECT * FROM parents WHERE client_id = ?',
+          [client.id]
+        );
+        
+        return {
+          id: client.id,
+          admissionNumber: client.admissionNumber || client.admission_number,
+          firstName: client.firstName || client.first_name,
+          lastName: client.lastName || client.last_name,
+          dateOfBirth: client.dateOfBirth || client.date_of_birth,
+          gender: client.gender,
+          originalHome: client.originalHome || client.original_home,
+          street: client.street,
+          admissionDate: client.admissionDate || client.admission_date,
+          intake: client.intake,
+          notes: client.notes,
+          parents: parents.map(p => ({
+            id: p.id,
+            name: p.name,
+            contact: p.contact,
+            location: p.location,
+            relationship: p.relationship
+          }))
+        };
+      })
+    );
+    
+    return clientsWithParents;
+  } catch (error) {
+    console.error("Error fetching clients:", error);
+    return [];
+  }
 };
 
 // Get client by ID
 export const getClientById = async (id: string): Promise<Client | null> => {
-  const clients = await query<any[]>('SELECT * FROM clients WHERE id = ?', [id]);
-  
-  if (clients.length === 0) {
+  try {
+    const clients = await query<any[]>('SELECT * FROM clients WHERE id = ?', [id]);
+    
+    if (clients.length === 0) {
+      return null;
+    }
+    
+    const client = clients[0];
+    
+    // Get parents
+    const parents = await query<Parent[]>(
+      'SELECT * FROM parents WHERE client_id = ?',
+      [id]
+    );
+    
+    return {
+      id: client.id,
+      admissionNumber: client.admissionNumber || client.admission_number,
+      firstName: client.firstName || client.first_name,
+      lastName: client.lastName || client.last_name,
+      dateOfBirth: client.dateOfBirth || client.date_of_birth,
+      gender: client.gender,
+      originalHome: client.originalHome || client.original_home,
+      street: client.street,
+      admissionDate: client.admissionDate || client.admission_date,
+      intake: client.intake,
+      notes: client.notes,
+      parents: parents.map(p => ({
+        id: p.id,
+        name: p.name,
+        contact: p.contact,
+        location: p.location,
+        relationship: p.relationship
+      }))
+    };
+  } catch (error) {
+    console.error("Error fetching client:", error);
     return null;
   }
-  
-  const client = clients[0];
-  
-  // Get parents
-  const parents = await query<Parent[]>(
-    'SELECT * FROM parents WHERE client_id = ?',
-    [id]
-  );
-  
-  return {
-    id: client.id,
-    admissionNumber: client.admission_number,
-    firstName: client.first_name,
-    lastName: client.last_name,
-    dateOfBirth: client.date_of_birth,
-    gender: client.gender,
-    originalHome: client.original_home,
-    street: client.street,
-    admissionDate: client.admission_date,
-    intake: client.intake,
-    notes: client.notes,
-    parents: parents.map(p => ({
-      id: p.id,
-      name: p.name,
-      contact: p.contact,
-      location: p.location,
-      relationship: p.relationship
-    }))
-  };
 };
 
 // Add new client
 export const addClient = async (client: Omit<Client, 'id'>): Promise<Client> => {
-  const clientId = uuidv4();
-  
-  // Insert client
-  await query(
-    `INSERT INTO clients (
-      id, admission_number, first_name, last_name, date_of_birth, 
-      gender, original_home, street, admission_date, intake, notes
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-    [
-      clientId,
-      client.admissionNumber,
-      client.firstName,
-      client.lastName,
-      client.dateOfBirth,
-      client.gender,
-      client.originalHome,
-      client.street,
-      client.admissionDate,
-      client.intake,
-      client.notes || null
-    ]
-  );
-  
-  // Insert parents
-  if (client.parents && client.parents.length > 0) {
-    for (const parent of client.parents) {
-      const parentId = uuidv4();
-      await query(
-        `INSERT INTO parents (
-          id, name, contact, location, relationship, client_id
-        ) VALUES (?, ?, ?, ?, ?, ?)`,
-        [
-          parentId,
-          parent.name,
-          parent.contact,
-          parent.location,
-          parent.relationship,
-          clientId
-        ]
-      );
+  try {
+    const clientId = uuidv4();
+    
+    // Insert client - in our mock version, we save the object directly to localStorage
+    await query(
+      `INSERT INTO clients (
+        id, admission_number, first_name, last_name, date_of_birth, 
+        gender, original_home, street, admission_date, intake, notes
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        clientId,
+        client.admissionNumber,
+        client.firstName,
+        client.lastName,
+        client.dateOfBirth,
+        client.gender,
+        client.originalHome,
+        client.street,
+        client.admissionDate,
+        client.intake,
+        client.notes || null
+      ]
+    );
+    
+    // Insert parents directly to our mock storage
+    if (client.parents && client.parents.length > 0) {
+      const parents = getLocalStorage('db_parents');
+      
+      for (const parent of client.parents) {
+        const parentId = uuidv4();
+        parents.push({
+          id: parentId,
+          name: parent.name,
+          contact: parent.contact,
+          location: parent.location,
+          relationship: parent.relationship,
+          clientId: clientId
+        });
+      }
+      
+      setLocalStorage('db_parents', parents);
     }
+    
+    // Get the client with parents (this should work with our mock db)
+    const newClient = await getClientById(clientId);
+    return newClient as Client;
+  } catch (error) {
+    console.error("Error adding client:", error);
+    throw error;
   }
-  
-  // Get the client with parents
-  const newClient = await getClientById(clientId);
-  return newClient as Client;
+};
+
+// Helper function to access localStorage - copied from db.ts to avoid circular dependencies
+const getLocalStorage = (key: string, defaultValue: any[] = []) => {
+  const stored = localStorage.getItem(key);
+  return stored ? JSON.parse(stored) : defaultValue;
+};
+
+const setLocalStorage = (key: string, value: any) => {
+  localStorage.setItem(key, JSON.stringify(value));
 };
