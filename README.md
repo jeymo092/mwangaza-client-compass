@@ -61,36 +61,22 @@ This project is built with:
 - shadcn-ui
 - Tailwind CSS
 
-## Docker MySQL Setup
+## XAMPP MySQL Setup
 
-To run the MySQL database using Docker:
+To set up the MySQL database using XAMPP:
 
-1. Make sure Docker is installed on your system.
-2. Run the following command in the project root directory:
-
-```sh
-docker-compose up -d
-```
-
-This will start a MySQL container with the following credentials:
-- Database name: mwangaza_db
-- Username: mwangaza_user
-- Password: mwangaza_password
-- Port: 3306
-
-The database schema will be automatically created using the initialization script in `mysql/init/01-schema.sql`.
-
-To stop the container:
-
-```sh
-docker-compose down
-```
-
-To stop the container and remove the volume:
-
-```sh
-docker-compose down -v
-```
+1. Download and install XAMPP from https://www.apachefriends.org/
+2. Start the XAMPP Control Panel and start the Apache and MySQL services
+3. Open your web browser and go to http://localhost/phpmyadmin
+4. Create a new database named `mwangaza_db`
+5. Import the database schema from the SQL file in the `mysql/init/01-schema.sql` directory
+6. Update the database connection settings in the application:
+   - Go to the Database Configuration page
+   - Verify that the host is set to "localhost"
+   - Username should be "root"
+   - Password is typically blank in default XAMPP installations
+   - Database name should be "mwangaza_db"
+   - Click "Test Connection" and then "Save Configuration"
 
 ## How can I deploy this project?
 

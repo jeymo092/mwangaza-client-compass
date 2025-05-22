@@ -97,13 +97,22 @@ const DatabaseConfig = () => {
                 <CardHeader>
                   <CardTitle className="flex items-center">
                     <ServerCog className="mr-2 h-5 w-5" />
-                    MySQL Database Settings
+                    XAMPP MySQL Connection Settings
                   </CardTitle>
                   <CardDescription>
-                    Configure your MySQL database connection for the application
+                    Configure your XAMPP MySQL database connection for the application
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
+                  <div className="bg-amber-50 border border-amber-200 rounded-md p-4 mb-4 text-amber-800">
+                    <h3 className="font-medium mb-1">XAMPP Setup Instructions:</h3>
+                    <ol className="list-decimal list-inside space-y-1 text-sm">
+                      <li>Make sure XAMPP is installed and Apache & MySQL services are running</li>
+                      <li>Create a new database named 'mwangaza_db' in phpMyAdmin</li>
+                      <li>Default MySQL credentials in XAMPP are username 'root' with blank password</li>
+                    </ol>
+                  </div>
+
                   <div className="space-y-2">
                     <Label htmlFor="host">Database Host</Label>
                     <Input
@@ -129,7 +138,7 @@ const DatabaseConfig = () => {
                       type="password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      placeholder="Enter password"
+                      placeholder="Enter password (blank for default XAMPP)"
                     />
                   </div>
                   <div className="space-y-2">
@@ -155,7 +164,7 @@ const DatabaseConfig = () => {
                         <div className="h-2 w-2 rounded-full bg-red-500 mr-2"></div>
                         Failed to connect to database
                       </div>
-                      <p className="text-sm mt-1">Please check your connection details and ensure the MySQL server is running.</p>
+                      <p className="text-sm mt-1">Please check your connection details and ensure XAMPP MySQL server is running.</p>
                     </div>
                   )}
                   

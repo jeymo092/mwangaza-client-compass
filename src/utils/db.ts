@@ -19,6 +19,14 @@ const DB_KEYS = {
   HOME_VISITS: 'db_home_visits',
 };
 
+// XAMPP default settings
+const DEFAULT_XAMPP_CONFIG = {
+  host: 'localhost',
+  user: 'root',
+  password: '', // Default XAMPP password is blank
+  database: 'mwangaza_db',
+};
+
 // Initialize with some data if empty
 const initializeDatabase = () => {
   // Only initialize if not already set up
