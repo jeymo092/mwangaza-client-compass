@@ -20,7 +20,6 @@ import { toast } from "@/components/ui/sonner";
 import jsPDF from "jspdf";
 // Using the correct import for jspdf-autotable
 import autoTable from "jspdf-autotable";
-import { stringify } from "csv-stringify";
 import DepartmentAccess from "@/components/DepartmentAccess";
 
 const Reports = () => {
@@ -100,37 +99,48 @@ const Reports = () => {
     }
   };
   
-  // Export to CSV function
+  // Export to CSV function using browser-native approach
   const exportToCSV = () => {
     try {
-      // Prepare data
-      const csvData = filteredReports.map(report => {
+      // Prepare headers
+      const headers = ["Client Name", "Visit Date", "Conducted By", "Summary", "Recommendations"];
+      
+      // Prepare data rows
+      const dataRows = filteredReports.map(report => {
         const client = mockClients.find(c => c.id === report.clientId);
-        return {
-          "Client Name": client ? `${client.firstName} ${client.lastName}` : "Unknown Client",
-          "Visit Date": report.date,
-          "Conducted By": report.conductedBy,
-          "Summary": report.summary,
-          "Recommendations": report.recommendations || "",
-        };
+        return [
+          client ? `${client.firstName} ${client.lastName}` : "Unknown Client",
+          report.date,
+          report.conductedBy,
+          report.summary,
+          report.recommendations || ""
+        ];
       });
       
-      // Convert to CSV
-      stringify(csvData, { header: true }, (err, output) => {
-        if (err) throw err;
-        
-        // Create download link
-        const blob = new Blob([output], { type: "text/csv;charset=utf-8;" });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.setAttribute("href", url);
-        link.setAttribute("download", "mwangaza-home-visit-reports.csv");
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        
-        toast.success("CSV exported successfully");
-      });
+      // Combine headers and rows
+      const csvContent = [
+        headers.join(','), 
+        ...dataRows.map(row => 
+          row.map(cell => 
+            // Handle special characters and commas in cell values
+            typeof cell === 'string' && (cell.includes(',') || cell.includes('"') || cell.includes('\n')) 
+              ? `"${cell.replace(/"/g, '""')}"` 
+              : cell
+          ).join(',')
+        )
+      ].join('\n');
+      
+      // Create download link
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", "mwangaza-home-visit-reports.csv");
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      toast.success("CSV exported successfully");
     } catch (error) {
       console.error("Failed to export CSV:", error);
       toast.error("Failed to export CSV");
