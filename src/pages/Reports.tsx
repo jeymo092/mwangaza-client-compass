@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -15,17 +15,47 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 import { FileText, Search, Calendar, Download, Save } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import MainSidebar from "@/components/Sidebar";
-import { HomeVisit, mockHomeVisits, mockClients, currentUser } from "@/utils/types";
+import { HomeVisit, mockClients, currentUser } from "@/utils/types";
 import { toast } from "@/components/ui/sonner";
 import jsPDF from "jspdf";
 // Using the correct import for jspdf-autotable
 import autoTable from "jspdf-autotable";
 import DepartmentAccess from "@/components/DepartmentAccess";
+import { getHomeVisits } from "@/services/homeVisitService";
+import { getClients } from "@/services/clientService";
 
 const Reports = () => {
-  const [reports, setReports] = useState<HomeVisit[]>(mockHomeVisits);
+  const [reports, setReports] = useState<HomeVisit[]>([]);
+  const [clients, setClients] = useState(mockClients); // Using mock data as fallback
   const [searchQuery, setSearchQuery] = useState("");
   const [dateFilter, setDateFilter] = useState<string>("all");
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        // Fetch home visits from database
+        const homeVisitsData = await getHomeVisits();
+        setReports(homeVisitsData);
+        
+        // Fetch clients from database
+        const clientsData = await getClients();
+        if (clientsData.length > 0) {
+          setClients(clientsData);
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        toast.error("Failed to load data from database");
+        // Fallback to mock data
+        setReports([]); 
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   const filteredReports = reports
     .filter(report => {
@@ -205,9 +235,15 @@ const Reports = () => {
             </div>
 
             <div className="space-y-6">
-              {filteredReports.length > 0 ? (
+              {loading ? (
+                <Card className="p-8">
+                  <div className="flex justify-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+                  </div>
+                </Card>
+              ) : filteredReports.length > 0 ? (
                 filteredReports.map((report) => {
-                  const client = mockClients.find(c => c.id === report.clientId);
+                  const client = clients.find(c => c.id === report.clientId);
                   
                   return (
                     <Card key={report.id}>

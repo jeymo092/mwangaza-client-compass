@@ -10,9 +10,11 @@ import Clients from "./pages/Clients";
 import ClientProfile from "./pages/ClientProfile";
 import RegisterClient from "./pages/RegisterClient";
 import Reports from "./pages/Reports";
+import DatabaseConfig from "./pages/DatabaseConfig";
 import NotFound from "./pages/NotFound";
 import { useEffect, useState } from "react";
 import { getCurrentUser } from "./utils/types";
+import { testConnection } from "./utils/db";
 
 // Protected route component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -35,48 +37,78 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          
-          {/* Protected routes */}
-          <Route path="/dashboard" element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          } />
-          <Route path="/clients" element={
-            <ProtectedRoute>
-              <Clients />
-            </ProtectedRoute>
-          } />
-          <Route path="/clients/register" element={
-            <ProtectedRoute>
-              <RegisterClient />
-            </ProtectedRoute>
-          } />
-          <Route path="/clients/:id" element={
-            <ProtectedRoute>
-              <ClientProfile />
-            </ProtectedRoute>
-          } />
-          <Route path="/reports" element={
-            <ProtectedRoute>
-              <Reports />
-            </ProtectedRoute>
-          } />
-          
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+const App = () => {
+  // Test database connection on app load
+  useEffect(() => {
+    const initDB = async () => {
+      // Check if we have database settings in localStorage
+      const hasDBConfig = localStorage.getItem('DB_HOST') && 
+                         localStorage.getItem('DB_USER') && 
+                         localStorage.getItem('DB_NAME');
+      
+      if (hasDBConfig) {
+        // Set environment variables from localStorage
+        process.env.DB_HOST = localStorage.getItem('DB_HOST') || undefined;
+        process.env.DB_USER = localStorage.getItem('DB_USER') || undefined;
+        process.env.DB_PASSWORD = localStorage.getItem('DB_PASSWORD') || undefined;
+        process.env.DB_NAME = localStorage.getItem('DB_NAME') || undefined;
+        
+        // Test connection
+        await testConnection();
+      }
+    };
+    
+    initDB();
+  }, []);
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            
+            {/* Protected routes */}
+            <Route path="/dashboard" element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            } />
+            <Route path="/clients" element={
+              <ProtectedRoute>
+                <Clients />
+              </ProtectedRoute>
+            } />
+            <Route path="/clients/register" element={
+              <ProtectedRoute>
+                <RegisterClient />
+              </ProtectedRoute>
+            } />
+            <Route path="/clients/:id" element={
+              <ProtectedRoute>
+                <ClientProfile />
+              </ProtectedRoute>
+            } />
+            <Route path="/reports" element={
+              <ProtectedRoute>
+                <Reports />
+              </ProtectedRoute>
+            } />
+            <Route path="/database-config" element={
+              <ProtectedRoute>
+                <DatabaseConfig />
+              </ProtectedRoute>
+            } />
+            
+            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </TooltipProvider>
+    </QueryClientProvider>
+  );
+};
 
 export default App;
