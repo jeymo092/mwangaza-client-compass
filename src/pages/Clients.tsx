@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import {
   Table,
   TableBody,
@@ -35,6 +36,25 @@ const Clients = () => {
       client.admissionNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
       client.originalHome.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  // Helper function to get status badge variant
+  const getStatusBadgeVariant = (status?: string) => {
+    switch (status) {
+      case "successful_reintegration": return "success";
+      case "early_reintegration": return "warning";
+      case "discharge": return "secondary";
+      case "referral": return "outline";
+      default: return "default";
+    }
+  };
+
+  // Format status for display
+  const formatStatus = (status?: string) => {
+    if (!status) return "Active";
+    return status.split('_').map(word => 
+      word.charAt(0).toUpperCase() + word.slice(1)
+    ).join(' ');
+  };
 
   return (
     <SidebarProvider>
@@ -74,6 +94,7 @@ const Clients = () => {
                     <TableHead className="w-[180px]">Admission #</TableHead>
                     <TableHead>Name</TableHead>
                     <TableHead className="hidden md:table-cell">Original Home</TableHead>
+                    <TableHead className="hidden md:table-cell">Status</TableHead>
                     <TableHead className="hidden md:table-cell">Admission Date</TableHead>
                     <TableHead>Actions</TableHead>
                   </TableRow>
@@ -87,6 +108,11 @@ const Clients = () => {
                         <TableCell className="hidden md:table-cell">
                           {client.originalHome}
                           {client.street && `, ${client.street}`}
+                        </TableCell>
+                        <TableCell className="hidden md:table-cell">
+                          <Badge variant={getStatusBadgeVariant(client.status)}>
+                            {formatStatus(client.status)}
+                          </Badge>
                         </TableCell>
                         <TableCell className="hidden md:table-cell">{client.admissionDate}</TableCell>
                         <TableCell>
@@ -106,6 +132,9 @@ const Clients = () => {
                               <DropdownMenuItem asChild>
                                 <Link to={`/clients/${client.id}/home-visits`}>Home Visits</Link>
                               </DropdownMenuItem>
+                              <DropdownMenuItem asChild>
+                                <Link to={`/clients/${client.id}?tab=aftercare`}>Aftercare Status</Link>
+                              </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>
                         </TableCell>
@@ -113,7 +142,7 @@ const Clients = () => {
                     ))
                   ) : (
                     <TableRow>
-                      <TableCell colSpan={5} className="text-center h-24">
+                      <TableCell colSpan={6} className="text-center h-24">
                         <div className="flex flex-col items-center justify-center text-muted-foreground">
                           <FileText className="h-8 w-8 mb-2" />
                           <p>No clients found</p>

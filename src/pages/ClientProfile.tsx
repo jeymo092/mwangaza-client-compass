@@ -7,11 +7,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { SidebarProvider } from "@/components/ui/sidebar";
-import { User, FileText, CalendarDays, BookOpen, Home } from "lucide-react";
+import { User, FileText, CalendarDays, BookOpen, Home, GraduationCap } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import MainSidebar from "@/components/Sidebar";
 import AcademicProgress from "@/components/AcademicProgress";
 import HomeVisitForm from "@/components/HomeVisitForm";
+import AftercareProgramForm from "@/components/AftercareProgramForm";
 import { Client, HomeVisit, AcademicRecord, mockClients, mockHomeVisits, mockAcademicRecords } from "@/utils/types";
 import DepartmentAccess from "@/components/DepartmentAccess";
 import { toast } from "@/components/ui/sonner";
@@ -63,6 +64,29 @@ const ClientProfile = () => {
     toast.success("Client notes updated successfully");
   };
 
+  const handleClientStatusUpdate = (updatedClient: Client) => {
+    setClient(updatedClient);
+  };
+
+  // Helper function to get status badge variant
+  const getStatusBadgeVariant = (status?: string) => {
+    switch (status) {
+      case "successful_reintegration": return "success";
+      case "early_reintegration": return "warning";
+      case "discharge": return "secondary";
+      case "referral": return "outline";
+      default: return "default";
+    }
+  };
+
+  // Format status for display
+  const formatStatus = (status?: string) => {
+    if (!status) return "Active";
+    return status.split('_').map(word => 
+      word.charAt(0).toUpperCase() + word.slice(1)
+    ).join(' ');
+  };
+
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full">
@@ -86,9 +110,10 @@ const ClientProfile = () => {
                     <h1 className="text-2xl font-bold">
                       {client.firstName} {client.lastName}
                     </h1>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
                       <Badge variant="outline">{client.admissionNumber}</Badge>
                       <Badge variant="secondary" className="capitalize">{client.gender}</Badge>
+                      <Badge variant={getStatusBadgeVariant(client.status)}>{formatStatus(client.status)}</Badge>
                     </div>
                   </div>
                 </div>
@@ -143,6 +168,10 @@ const ClientProfile = () => {
                       <h3 className="text-sm font-medium text-muted-foreground">Admission Date</h3>
                       <p>{client.admissionDate}</p>
                     </div>
+                    <div>
+                      <h3 className="text-sm font-medium text-muted-foreground">Status</h3>
+                      <p className="capitalize">{formatStatus(client.status)}</p>
+                    </div>
                   </CardContent>
                 </Card>
 
@@ -179,10 +208,11 @@ const ClientProfile = () => {
 
               <div className="md:col-span-2">
                 <Tabs defaultValue="overview" className="w-full">
-                  <TabsList className="grid grid-cols-4 mb-4">
+                  <TabsList className="grid grid-cols-5 mb-4">
                     <TabsTrigger value="overview">Overview</TabsTrigger>
                     <TabsTrigger value="academic">Academic</TabsTrigger>
                     <TabsTrigger value="home-visits">Home Visits</TabsTrigger>
+                    <TabsTrigger value="aftercare">Aftercare</TabsTrigger>
                     <TabsTrigger value="notes">Notes</TabsTrigger>
                   </TabsList>
 
@@ -289,6 +319,16 @@ const ClientProfile = () => {
                               : "No home visits conducted yet."}
                           </p>
                         </div>
+
+                        {client.status === "successful_reintegration" && client.aftercareDetails && (
+                          <div className="border-l-4 border-green-500 pl-4 py-2">
+                            <h3 className="font-medium">Reintegration Program</h3>
+                            <p className="text-sm">
+                              Successfully reintegrated into {client.aftercareDetails.programType.replace('_', ' ')} 
+                              {client.aftercareDetails.institutionName && `: ${client.aftercareDetails.institutionName}`}
+                            </p>
+                          </div>
+                        )}
                       </CardContent>
                     </Card>
                   </TabsContent>
@@ -349,6 +389,91 @@ const ClientProfile = () => {
                         <HomeVisitForm 
                           clientId={client.id}
                           onVisitAdded={handleHomeVisitAdded}
+                        />
+                      </DepartmentAccess>
+                    </div>
+                  </TabsContent>
+
+                  <TabsContent value="aftercare" id="aftercare-tab">
+                    <div className="space-y-6">
+                      <Card>
+                        <CardHeader>
+                          <div className="flex items-center gap-2">
+                            <GraduationCap className="h-5 w-5 text-muted-foreground" />
+                            <CardTitle>Aftercare & Reintegration Status</CardTitle>
+                          </div>
+                          <CardDescription>
+                            Current status and reintegration progress
+                          </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                          {client.status === "successful_reintegration" && client.aftercareDetails ? (
+                            <div className="space-y-4">
+                              <div className="bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-900 rounded-lg p-4">
+                                <div className="flex items-center gap-2 mb-2">
+                                  <Badge variant="success">Successfully Reintegrated</Badge>
+                                  <span className="text-sm text-muted-foreground">
+                                    {client.aftercareDetails.startDate && `Since ${client.aftercareDetails.startDate}`}
+                                  </span>
+                                </div>
+                                
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                  <div>
+                                    <h4 className="text-sm font-medium">Program</h4>
+                                    <p className="capitalize">{client.aftercareDetails.programType.replace('_', ' ')}</p>
+                                  </div>
+                                  
+                                  {client.aftercareDetails.institutionName && (
+                                    <div>
+                                      <h4 className="text-sm font-medium">Institution</h4>
+                                      <p>{client.aftercareDetails.institutionName}</p>
+                                    </div>
+                                  )}
+                                  
+                                  {client.aftercareDetails.contactPerson && (
+                                    <div>
+                                      <h4 className="text-sm font-medium">Contact Person</h4>
+                                      <p>{client.aftercareDetails.contactPerson}</p>
+                                    </div>
+                                  )}
+                                  
+                                  {client.aftercareDetails.contactDetails && (
+                                    <div>
+                                      <h4 className="text-sm font-medium">Contact Details</h4>
+                                      <p>{client.aftercareDetails.contactDetails}</p>
+                                    </div>
+                                  )}
+                                </div>
+                                
+                                {client.aftercareDetails.notes && (
+                                  <div className="mt-3">
+                                    <h4 className="text-sm font-medium">Notes</h4>
+                                    <p className="text-sm mt-1">{client.aftercareDetails.notes}</p>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          ) : client.status && client.status !== "active" ? (
+                            <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-900 rounded-lg p-4">
+                              <div className="flex items-center gap-2 mb-2">
+                                <Badge variant={getStatusBadgeVariant(client.status)}>{formatStatus(client.status)}</Badge>
+                              </div>
+                              <p className="text-sm">No detailed program information available.</p>
+                            </div>
+                          ) : (
+                            <div className="text-center py-6 text-muted-foreground">
+                              <GraduationCap className="mx-auto h-8 w-8 mb-2" />
+                              <p>Client currently active in the program</p>
+                              <p className="text-sm mt-1">Update status when client is reintegrated or discharged</p>
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
+
+                      <DepartmentAccess allowedRoles={["admin", "social_worker"]}>
+                        <AftercareProgramForm 
+                          client={client}
+                          onStatusUpdate={handleClientStatusUpdate}
                         />
                       </DepartmentAccess>
                     </div>

@@ -43,6 +43,29 @@ export interface AcademicRecord {
   comments?: string;
 }
 
+export type ClientStatus = 
+  | "active" 
+  | "successful_reintegration" 
+  | "early_reintegration" 
+  | "discharge" 
+  | "referral";
+
+export type ReintegrationProgram = 
+  | "school" 
+  | "training_institution" 
+  | "family" 
+  | "independent_living" 
+  | "other";
+
+export interface AftercareProgramDetails {
+  programType: ReintegrationProgram;
+  institutionName?: string;
+  contactPerson?: string;
+  contactDetails?: string;
+  startDate?: string;
+  notes?: string;
+}
+
 export interface Client {
   id: string;
   admissionNumber: string;
@@ -53,7 +76,9 @@ export interface Client {
   originalHome: string;
   street: string;
   admissionDate: string;
-  intake?: string;  // Added intake field
+  intake?: string;
+  status?: ClientStatus;
+  aftercareDetails?: AftercareProgramDetails;
   parents: Parent[];
   academicRecords?: AcademicRecord[];
   homeVisits?: HomeVisit[];

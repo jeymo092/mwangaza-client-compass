@@ -25,6 +25,8 @@ CREATE TABLE IF NOT EXISTS clients (
   original_home VARCHAR(100) NOT NULL,
   street VARCHAR(100) NOT NULL,
   admission_date DATE NOT NULL,
+  status ENUM('active', 'successful_reintegration', 'early_reintegration', 'discharge', 'referral') DEFAULT 'active',
+  aftercare_details JSON,
   notes TEXT,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP

@@ -70,6 +70,32 @@ export const addHomeVisit = async (homeVisit: Omit<HomeVisit, 'id'>): Promise<Ho
   }
 };
 
+// Update existing home visit
+export const updateHomeVisit = async (homeVisit: HomeVisit): Promise<HomeVisit> => {
+  try {
+    const visits = getLocalStorage('db_home_visits', []);
+    const visitIndex = visits.findIndex((visit: any) => visit.id === homeVisit.id);
+    
+    if (visitIndex === -1) {
+      throw new Error("Home visit not found");
+    }
+    
+    visits[visitIndex] = {
+      ...visits[visitIndex],
+      date: homeVisit.date,
+      conductedBy: homeVisit.conductedBy,
+      summary: homeVisit.summary,
+      recommendations: homeVisit.recommendations
+    };
+    
+    setLocalStorage('db_home_visits', visits);
+    return homeVisit;
+  } catch (error) {
+    console.error("Error updating home visit:", error);
+    throw error;
+  }
+};
+
 // Helper function to access localStorage - copied from db.ts to avoid circular dependencies
 const getLocalStorage = (key: string, defaultValue: any[] = []) => {
   const stored = localStorage.getItem(key);

@@ -1,6 +1,6 @@
 
 import { query } from '../utils/db';
-import { Client, Parent } from '../utils/types';
+import { Client, Parent, ClientStatus, AftercareProgramDetails } from '../utils/types';
 import { v4 as uuidv4 } from 'uuid';
 
 // Get all clients
@@ -27,6 +27,8 @@ export const getClients = async (): Promise<Client[]> => {
           street: client.street,
           admissionDate: client.admissionDate || client.admission_date,
           intake: client.intake,
+          status: client.status || "active",
+          aftercareDetails: client.aftercareDetails || null,
           notes: client.notes,
           parents: parents.map(p => ({
             id: p.id,
@@ -74,6 +76,8 @@ export const getClientById = async (id: string): Promise<Client | null> => {
       street: client.street,
       admissionDate: client.admissionDate || client.admission_date,
       intake: client.intake,
+      status: client.status || "active",
+      aftercareDetails: client.aftercareDetails || null,
       notes: client.notes,
       parents: parents.map(p => ({
         id: p.id,
@@ -98,8 +102,9 @@ export const addClient = async (client: Omit<Client, 'id'>): Promise<Client> => 
     await query(
       `INSERT INTO clients (
         id, admission_number, first_name, last_name, date_of_birth, 
-        gender, original_home, street, admission_date, intake, notes
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        gender, original_home, street, admission_date, intake, notes, 
+        status, aftercare_details
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         clientId,
         client.admissionNumber,
@@ -110,8 +115,10 @@ export const addClient = async (client: Omit<Client, 'id'>): Promise<Client> => 
         client.originalHome,
         client.street,
         client.admissionDate,
-        client.intake,
-        client.notes || null
+        client.intake || null,
+        client.notes || null,
+        client.status || "active",
+        client.aftercareDetails ? JSON.stringify(client.aftercareDetails) : null
       ]
     );
     
@@ -140,6 +147,40 @@ export const addClient = async (client: Omit<Client, 'id'>): Promise<Client> => 
   } catch (error) {
     console.error("Error adding client:", error);
     throw error;
+  }
+};
+
+// Update client status and aftercare details
+export const updateClientStatus = async (
+  clientId: string, 
+  status: ClientStatus, 
+  aftercareDetails?: AftercareProgramDetails
+): Promise<Client | null> => {
+  try {
+    // Get the existing client data
+    const clients = getLocalStorage('db_clients', []);
+    const clientIndex = clients.findIndex((c: any) => c.id === clientId);
+    
+    if (clientIndex === -1) {
+      console.error("Client not found");
+      return null;
+    }
+    
+    // Update the client's status and aftercare details
+    clients[clientIndex] = {
+      ...clients[clientIndex],
+      status: status,
+      aftercareDetails: aftercareDetails || null
+    };
+    
+    // Save back to localStorage
+    setLocalStorage('db_clients', clients);
+    
+    // Return the updated client
+    return await getClientById(clientId);
+  } catch (error) {
+    console.error("Error updating client status:", error);
+    return null;
   }
 };
 
