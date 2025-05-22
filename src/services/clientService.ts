@@ -184,6 +184,31 @@ export const updateClientStatus = async (
   }
 };
 
+// Update client notes - added for social workers
+export const updateClientNotes = async (clientId: string, notes: string): Promise<Client | null> => {
+  try {
+    const clients = getLocalStorage('db_clients', []);
+    const clientIndex = clients.findIndex((c: any) => c.id === clientId);
+    
+    if (clientIndex === -1) {
+      console.error("Client not found");
+      return null;
+    }
+    
+    // Update only the notes field
+    clients[clientIndex] = {
+      ...clients[clientIndex],
+      notes: notes
+    };
+    
+    setLocalStorage('db_clients', clients);
+    return await getClientById(clientId);
+  } catch (error) {
+    console.error("Error updating client notes:", error);
+    return null;
+  }
+};
+
 // Helper function to access localStorage - copied from db.ts to avoid circular dependencies
 const getLocalStorage = (key: string, defaultValue: any[] = []) => {
   const stored = localStorage.getItem(key);

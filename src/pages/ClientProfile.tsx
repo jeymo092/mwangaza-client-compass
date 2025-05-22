@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -488,15 +487,28 @@ const ClientProfile = () => {
                         </CardDescription>
                       </CardHeader>
                       <CardContent>
-                        <Textarea 
-                          value={notes} 
-                          onChange={(e) => setNotes(e.target.value)}
-                          placeholder="Enter notes about the client's progress, behavior, special needs, etc."
-                          className="min-h-[200px]"
-                        />
+                        <DepartmentAccess allowedRoles={["admin", "social_worker"]}>
+                          <Textarea 
+                            value={notes} 
+                            onChange={(e) => setNotes(e.target.value)}
+                            placeholder="Enter notes about the client's progress, behavior, special needs, etc."
+                            className="min-h-[200px]"
+                          />
+                        </DepartmentAccess>
+                        <DepartmentAccess 
+                          allowedRoles={["psychologist", "educator"]} 
+                          fallback={null}
+                        >
+                          <div className="p-4 bg-muted rounded-md mt-2 text-sm">
+                            <p className="font-medium mb-2">Notes:</p>
+                            <p className="whitespace-pre-wrap">{notes || "No notes available."}</p>
+                          </div>
+                        </DepartmentAccess>
                       </CardContent>
                       <CardFooter className="flex justify-end">
-                        <Button onClick={handleNotesUpdate}>Save Notes</Button>
+                        <DepartmentAccess allowedRoles={["admin", "social_worker"]}>
+                          <Button onClick={handleNotesUpdate}>Save Notes</Button>
+                        </DepartmentAccess>
                       </CardFooter>
                     </Card>
                   </TabsContent>

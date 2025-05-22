@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { toast } from "@/components/ui/sonner";
 import { HomeVisit } from "@/utils/types";
 import { currentUser } from "@/utils/types";
+import { addHomeVisit } from "@/services/homeVisitService";
 
 interface HomeVisitFormProps {
   clientId: string;
@@ -18,31 +19,40 @@ const HomeVisitForm = ({ clientId, onVisitAdded }: HomeVisitFormProps) => {
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
   const [summary, setSummary] = useState("");
   const [recommendations, setRecommendations] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
 
     if (!date || !summary) {
       toast.error("Please fill in all required fields");
+      setIsSubmitting(false);
       return;
     }
 
-    const newVisit: HomeVisit = {
-      id: `hv${Date.now()}`,
-      clientId,
-      date,
-      conductedBy: currentUser.name,
-      summary,
-      recommendations
-    };
+    try {
+      const newVisit = await addHomeVisit({
+        clientId,
+        date,
+        conductedBy: currentUser.name,
+        summary,
+        recommendations
+      });
 
-    onVisitAdded(newVisit);
-    toast.success("Home visit report added successfully");
+      onVisitAdded(newVisit);
+      toast.success("Home visit report added successfully");
 
-    // Reset form
-    setDate(new Date().toISOString().split("T")[0]);
-    setSummary("");
-    setRecommendations("");
+      // Reset form
+      setDate(new Date().toISOString().split("T")[0]);
+      setSummary("");
+      setRecommendations("");
+    } catch (error) {
+      console.error("Error adding home visit:", error);
+      toast.error("Failed to add home visit report");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -88,7 +98,9 @@ const HomeVisitForm = ({ clientId, onVisitAdded }: HomeVisitFormProps) => {
           </div>
 
           <CardFooter className="flex justify-end p-0 pt-4">
-            <Button type="submit">Submit Report</Button>
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? "Submitting..." : "Submit Report"}
+            </Button>
           </CardFooter>
         </form>
       </CardContent>

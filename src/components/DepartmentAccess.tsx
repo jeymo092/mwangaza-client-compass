@@ -28,8 +28,14 @@ const DepartmentAccess = ({
   // Admin has access to everything regardless of department
   const isAdmin = currentUser.role === "admin";
   
-  // Grant access if user is admin or has both role and department access
-  const hasAccess = isAdmin || (hasRoleAccess && hasDepartmentAccess);
+  // Social workers have special access to client-related operations
+  const hasSocialWorkerAccess = 
+    currentUser.role === "social_worker" && 
+    allowedRoles.includes("admin") && 
+    (allowedRoles.includes("social_worker") || allowedRoles.includes("admin"));
+  
+  // Grant access if user is admin, has both role and department access, or has social worker access
+  const hasAccess = isAdmin || hasSocialWorkerAccess || (hasRoleAccess && hasDepartmentAccess);
 
   return hasAccess ? <>{children}</> : <>{fallback}</>;
 };

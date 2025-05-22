@@ -42,6 +42,7 @@ const AftercareProgramForm = ({ client, onStatusUpdate }: AftercareProgramFormPr
   const [startDate, setStartDate] = useState(client.aftercareDetails?.startDate || new Date().toISOString().split("T")[0]);
   const [notes, setNotes] = useState(client.aftercareDetails?.notes || "");
   const [showProgramDetails, setShowProgramDetails] = useState(status === "successful_reintegration");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   useEffect(() => {
     // Only show program details for successful reintegration
@@ -50,6 +51,7 @@ const AftercareProgramForm = ({ client, onStatusUpdate }: AftercareProgramFormPr
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
 
     try {
       let aftercareDetails: AftercareProgramDetails | undefined;
@@ -77,6 +79,8 @@ const AftercareProgramForm = ({ client, onStatusUpdate }: AftercareProgramFormPr
     } catch (error) {
       console.error("Error updating status:", error);
       toast.error("An error occurred while updating client status");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -184,7 +188,9 @@ const AftercareProgramForm = ({ client, onStatusUpdate }: AftercareProgramFormPr
           )}
 
           <CardFooter className="flex justify-end p-0 pt-4">
-            <Button type="submit">Update Status</Button>
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? "Updating..." : "Update Status"}
+            </Button>
           </CardFooter>
         </form>
       </CardContent>

@@ -96,6 +96,26 @@ export const updateHomeVisit = async (homeVisit: HomeVisit): Promise<HomeVisit> 
   }
 };
 
+// Delete a home visit (added for social workers)
+export const deleteHomeVisit = async (visitId: string): Promise<boolean> => {
+  try {
+    const visits = getLocalStorage('db_home_visits', []);
+    const visitIndex = visits.findIndex((visit: any) => visit.id === visitId);
+    
+    if (visitIndex === -1) {
+      return false;
+    }
+    
+    visits.splice(visitIndex, 1);
+    setLocalStorage('db_home_visits', visits);
+    
+    return true;
+  } catch (error) {
+    console.error("Error deleting home visit:", error);
+    return false;
+  }
+};
+
 // Helper function to access localStorage - copied from db.ts to avoid circular dependencies
 const getLocalStorage = (key: string, defaultValue: any[] = []) => {
   const stored = localStorage.getItem(key);
