@@ -18,6 +18,7 @@ import MainSidebar from "@/components/Sidebar";
 import { HomeVisit, mockHomeVisits, mockClients, currentUser } from "@/utils/types";
 import { toast } from "@/components/ui/sonner";
 import jsPDF from "jspdf";
+// Using the correct import for jspdf-autotable
 import autoTable from "jspdf-autotable";
 import { stringify } from "csv-stringify";
 import DepartmentAccess from "@/components/DepartmentAccess";
